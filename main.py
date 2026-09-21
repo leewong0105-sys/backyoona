@@ -14,7 +14,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="전국 인구통계 놀이터",
-    page_icon="인구",
+    page_icon="👥",
     layout="wide",
 )
 
@@ -28,12 +28,7 @@ GEOJSON_URL = (
     "data/boundaries/sigungu_kr.geojson"
 )
 
-
-# =========================================================
-# 색상
-# =========================================================
-
-PALETTE = [
+COLORS = [
     "#FFF1B8",
     "#FFD6A5",
     "#FFB4A2",
@@ -43,28 +38,22 @@ PALETTE = [
 
 
 # =========================================================
-# 깔끔하고 살짝 깜찍한 디자인
+# 디자인
 # =========================================================
 
 st.markdown(
     """
     <style>
-
     .stApp {
         background:
             radial-gradient(
                 circle at 5% 5%,
-                rgba(255, 236, 174, 0.42),
+                rgba(255, 236, 174, 0.35),
                 transparent 18%
             ),
             radial-gradient(
                 circle at 95% 5%,
-                rgba(255, 207, 222, 0.42),
-                transparent 20%
-            ),
-            radial-gradient(
-                circle at 95% 90%,
-                rgba(200, 239, 226, 0.35),
+                rgba(255, 207, 222, 0.35),
                 transparent 20%
             ),
             #FFFDF9;
@@ -76,28 +65,23 @@ st.markdown(
         padding-bottom: 3rem;
     }
 
-    .title {
+    .cute-title {
         color: #46333B;
-        font-size: 2.8rem;
+        font-size: 2.7rem;
         font-weight: 900;
         letter-spacing: -2px;
-        line-height: 1.15;
-        margin-bottom: 4px;
+        line-height: 1.2;
     }
 
     .pink {
         color: #E76582;
     }
 
-    .yellow {
-        color: #E8A33A;
-    }
-
-    .subtitle {
+    .sub-text {
         color: #927982;
         font-size: 1rem;
         font-weight: 600;
-        margin-bottom: 22px;
+        margin-bottom: 20px;
     }
 
     .badge {
@@ -106,62 +90,32 @@ st.markdown(
         color: #C65070;
         border: 1px solid #F4C9D5;
         border-radius: 999px;
-        padding: 6px 14px;
-        font-size: 0.82rem;
+        padding: 5px 13px;
+        font-size: 0.8rem;
         font-weight: 800;
         margin-bottom: 8px;
     }
 
-    .bounce {
-        display: inline-block;
-        animation: bounce 1.5s ease-in-out infinite;
-    }
-
-    .bounce:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .bounce:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    @keyframes bounce {
-        0%, 100% {
-            transform: translateY(0) rotate(0deg);
-        }
-
-        50% {
-            transform: translateY(-7px) rotate(7deg);
-        }
-    }
-
-    .year-card {
-        background: white;
-        border: 2px solid #F4DCE2;
-        border-radius: 22px;
-        padding: 15px 20px;
-        margin-bottom: 18px;
-        box-shadow: 0 8px 24px rgba(80, 50, 60, 0.07);
-    }
-
-    .year-label {
-        color: #9A828A;
-        font-size: 0.78rem;
+    .guide {
+        background: linear-gradient(
+            100deg,
+            #FFF1C9,
+            #FFE5EE
+        );
+        border: 1px solid #F1D6DE;
+        border-radius: 16px;
+        padding: 11px 15px;
+        margin: 8px 0 12px 0;
+        color: #735861;
         font-weight: 700;
-    }
-
-    .year-value {
-        color: #D85D78;
-        font-size: 1.4rem;
-        font-weight: 900;
     }
 
     .section-title {
         color: #46333B;
         font-size: 1.45rem;
         font-weight: 900;
-        margin-top: 18px;
-        margin-bottom: 4px;
+        margin-top: 15px;
+        margin-bottom: 3px;
     }
 
     .section-description {
@@ -170,74 +124,31 @@ st.markdown(
         margin-bottom: 10px;
     }
 
-    .hover-guide {
-        background: linear-gradient(
-            100deg,
-            #FFF1C9,
-            #FFE5EE
-        );
-        border: 1px solid #F1D6DE;
-        border-radius: 17px;
-        padding: 11px 15px;
-        margin-bottom: 10px;
-        color: #735861;
-        font-size: 0.9rem;
-        font-weight: 700;
-    }
-
     [data-testid="stPlotlyChart"] {
         background: white;
         border: 1px solid #F0E0E4;
-        border-radius: 25px;
-        padding: 5px;
-        box-shadow: 0 12px 32px rgba(80, 50, 60, 0.09);
+        border-radius: 22px;
+        padding: 4px;
+        box-shadow: 0 10px 28px rgba(80, 50, 60, 0.08);
     }
 
-    .rank {
-        border-radius: 18px;
-        padding: 13px 16px;
+    .rank-high {
+        background: #FFE4EA;
+        color: #B84E68;
+        border: 1px solid #F4CDD6;
+        border-radius: 16px;
+        padding: 12px 15px;
         margin-bottom: 8px;
         font-weight: 900;
     }
 
-    .rank-high {
-        background: linear-gradient(
-            100deg,
-            #FFE0E8,
-            #FFF0D4
-        );
-        color: #B84E68;
-        border: 1px solid #F4CDD6;
-    }
-
     .rank-low {
-        background: linear-gradient(
-            100deg,
-            #DDF7EF,
-            #E9F5FF
-        );
+        background: #DDF7EF;
         color: #378875;
         border: 1px solid #C8E9DF;
-    }
-
-    .metric-card {
-        background: white;
-        border: 1px solid #F0DDE2;
-        border-radius: 20px;
-        padding: 15px 18px;
-        margin-bottom: 15px;
-        box-shadow: 0 6px 18px rgba(80, 50, 60, 0.05);
-    }
-
-    .metric-name {
-        color: #927C84;
-        font-size: 0.8rem;
-        font-weight: 700;
-    }
-
-    .metric-value {
-        color: #D85D78;
-        font-size: 1.35rem;
+        border-radius: 16px;
+        padding: 12px 15px;
+        margin-bottom: 8px;
         font-weight: 900;
     }
 
@@ -249,11 +160,6 @@ st.markdown(
         line-height: 1.8;
     }
 
-    [data-testid="stDataFrame"] {
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
     #MainMenu {
         visibility: hidden;
     }
@@ -261,7 +167,6 @@ st.markdown(
     footer {
         visibility: hidden;
     }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -274,7 +179,7 @@ st.markdown(
 
 @st.cache_data
 def load_population():
-    """압축된 전국 읍·면·동 인구 데이터를 불러옵니다."""
+    """전국 읍·면·동 인구 데이터를 불러옵니다."""
 
     response = requests.get(
         POPULATION_URL,
@@ -285,15 +190,12 @@ def load_population():
     with gzip.GzipFile(
         fileobj=io.BytesIO(response.content)
     ) as gz:
-
         df = pd.read_csv(
             gz,
-            dtype={
-                "코드": "string",
-            },
+            dtype={"코드": "string"},
         )
 
-    # 코드는 계산용 숫자가 아니라 행정구역 식별자입니다.
+    # 코드는 숫자가 아니라 행정구역 식별자입니다.
     df["코드"] = (
         df["코드"]
         .astype("string")
@@ -318,24 +220,15 @@ def load_geojson():
 
 
 # =========================================================
-# 나이별 열 준비
+# 나이별 열 찾기
 # =========================================================
 
-def get_age_columns(df, start_age, end_age):
-    """
-    지정한 나이 범위의 '계_' 인구 열을 찾습니다.
-
-    예:
-    0~14세 -> 계_0세 ~ 계_14세
-    """
+def age_columns(df, start_age, end_age):
+    """지정한 나이 범위의 '계_' 열을 찾습니다."""
 
     columns = []
 
-    for age in range(
-        start_age,
-        end_age + 1,
-    ):
-
+    for age in range(start_age, end_age + 1):
         column = f"계_{age}세"
 
         if column in df.columns:
@@ -345,239 +238,183 @@ def get_age_columns(df, start_age, end_age):
 
 
 # =========================================================
-# 시군구별 인구 지표 계산
+# 시군구별 통계 계산
 # =========================================================
 
 @st.cache_data
 def calculate_statistics(df):
 
-    latest_year = int(
-        df["연도"].max()
-    )
+    latest_year = int(df["연도"].max())
 
-    # 최신 연도 데이터만 사용
-    latest = df[
+    data = df[
         df["연도"] == latest_year
     ].copy()
 
     # 읍·면·동 코드 앞 5자리 = 시군구 코드
-    latest["시군구코드"] = (
-        latest["코드"].str[:5]
-    )
+    data["시군구코드"] = data["코드"].str[:5]
 
-
-    # -----------------------------------------------------
-    # 전체 인구
-    # -----------------------------------------------------
-
-    total_columns = get_age_columns(
-        latest,
+    # 전체
+    total_cols = age_columns(
+        data,
         0,
         99,
     )
 
-    if "계_100세 이상" in latest.columns:
-        total_columns.append(
-            "계_100세 이상"
-        )
+    if "계_100세 이상" in data.columns:
+        total_cols.append("계_100세 이상")
 
-
-    # -----------------------------------------------------
     # 0~14세
-    # -----------------------------------------------------
-
-    child_columns = get_age_columns(
-        latest,
+    child_cols = age_columns(
+        data,
         0,
         14,
     )
 
-
-    # -----------------------------------------------------
     # 15~64세
-    # -----------------------------------------------------
-
-    working_columns = get_age_columns(
-        latest,
+    working_cols = age_columns(
+        data,
         15,
         64,
     )
 
-
-    # -----------------------------------------------------
     # 65세 이상
-    # -----------------------------------------------------
-
-    elderly_columns = get_age_columns(
-        latest,
+    elderly_cols = age_columns(
+        data,
         65,
         99,
     )
 
-    if "계_100세 이상" in latest.columns:
-        elderly_columns.append(
-            "계_100세 이상"
-        )
+    if "계_100세 이상" in data.columns:
+        elderly_cols.append("계_100세 이상")
 
-
-    # -----------------------------------------------------
-    # 숫자로 변환
-    # -----------------------------------------------------
-
-    all_columns = set(
-        total_columns
-        + child_columns
-        + working_columns
-        + elderly_columns
+    # 숫자 변환
+    all_cols = set(
+        total_cols
+        + child_cols
+        + working_cols
+        + elderly_cols
     )
 
-    for column in all_columns:
-
-        latest[column] = pd.to_numeric(
-            latest[column],
+    for column in all_cols:
+        data[column] = pd.to_numeric(
+            data[column],
             errors="coerce",
         ).fillna(0)
 
-
-    # -----------------------------------------------------
-    # 읍·면·동별 인구 합계
-    # -----------------------------------------------------
-
-    latest["전체인구"] = latest[
-        total_columns
+    # 읍·면·동별 인구
+    data["전체인구"] = data[
+        total_cols
     ].sum(axis=1)
 
-    latest["유소년인구"] = latest[
-        child_columns
+    data["유소년인구"] = data[
+        child_cols
     ].sum(axis=1)
 
-    latest["생산연령인구"] = latest[
-        working_columns
+    data["생산연령인구"] = data[
+        working_cols
     ].sum(axis=1)
 
-    latest["고령인구"] = latest[
-        elderly_columns
+    data["고령인구"] = data[
+        elderly_cols
     ].sum(axis=1)
 
-
-    # -----------------------------------------------------
-    # 시군구별 합산
-    # -----------------------------------------------------
-
-    sigungu = (
-        latest
+    # 시군구 합계
+    result = (
+        data
         .groupby(
             "시군구코드",
             as_index=False,
         )
         .agg(
-            전체인구=(
-                "전체인구",
-                "sum",
-            ),
-            유소년인구=(
-                "유소년인구",
-                "sum",
-            ),
-            생산연령인구=(
-                "생산연령인구",
-                "sum",
-            ),
-            고령인구=(
-                "고령인구",
-                "sum",
-            ),
+            전체인구=("전체인구", "sum"),
+            유소년인구=("유소년인구", "sum"),
+            생산연령인구=("생산연령인구", "sum"),
+            고령인구=("고령인구", "sum"),
         )
     )
 
-
-    # -----------------------------------------------------
-    # 지표 계산
-    # -----------------------------------------------------
-
-    sigungu["고령화율"] = np.where(
-        sigungu["전체인구"] > 0,
-        sigungu["고령인구"]
-        / sigungu["전체인구"]
+    # 고령화율
+    result["고령화율"] = np.where(
+        result["전체인구"] > 0,
+        result["고령인구"]
+        / result["전체인구"]
         * 100,
         np.nan,
     )
 
-    sigungu["유소년비율"] = np.where(
-        sigungu["전체인구"] > 0,
-        sigungu["유소년인구"]
-        / sigungu["전체인구"]
+    # 유소년 비율
+    result["유소년비율"] = np.where(
+        result["전체인구"] > 0,
+        result["유소년인구"]
+        / result["전체인구"]
         * 100,
         np.nan,
     )
 
-    sigungu["생산연령비율"] = np.where(
-        sigungu["전체인구"] > 0,
-        sigungu["생산연령인구"]
-        / sigungu["전체인구"]
+    # 생산연령인구 비율
+    result["생산연령비율"] = np.where(
+        result["전체인구"] > 0,
+        result["생산연령인구"]
+        / result["전체인구"]
         * 100,
         np.nan,
     )
 
-    sigungu["노년부양비"] = np.where(
-        sigungu["생산연령인구"] > 0,
-        sigungu["고령인구"]
-        / sigungu["생산연령인구"]
+    # 노년부양비
+    result["노년부양비"] = np.where(
+        result["생산연령인구"] > 0,
+        result["고령인구"]
+        / result["생산연령인구"]
         * 100,
         np.nan,
     )
 
-
-    return latest_year, sigungu
+    return latest_year, result
 
 
 # =========================================================
-# 전국 연도별 인구
+# 전국 인구 추이
 # =========================================================
 
 @st.cache_data
 def calculate_national_trend(df):
 
-    total_columns = get_age_columns(
+    total_cols = age_columns(
         df,
         0,
         99,
     )
 
     if "계_100세 이상" in df.columns:
-        total_columns.append(
-            "계_100세 이상"
-        )
+        total_cols.append("계_100세 이상")
 
     data = df[
-        ["연도"] + total_columns
+        ["연도"] + total_cols
     ].copy()
 
-    for column in total_columns:
-
+    for column in total_cols:
         data[column] = pd.to_numeric(
             data[column],
             errors="coerce",
         ).fillna(0)
 
     data["전체인구"] = data[
-        total_columns
+        total_cols
     ].sum(axis=1)
 
-    trend = (
+    return (
         data
         .groupby(
             "연도",
             as_index=False,
         )["전체인구"]
         .sum()
+        .sort_values("연도")
     )
-
-    return trend
 
 
 # =========================================================
-# 지도 경계에 지표 연결
+# GeoJSON에 지표 연결
 # =========================================================
 
 def attach_metric(
@@ -586,7 +423,7 @@ def attach_metric(
     metric_column,
 ):
 
-    metric_map = (
+    value_map = (
         statistics
         .set_index("시군구코드")
         [metric_column]
@@ -595,22 +432,15 @@ def attach_metric(
 
     for feature in geojson["features"]:
 
-        properties = feature["properties"]
+        props = feature["properties"]
 
-        code = (
-            str(
-                properties.get(
-                    "코드",
-                    "",
-                )
-            )
-            .strip()
-            .zfill(5)
-        )
+        code = str(
+            props.get("코드", "")
+        ).strip().zfill(5)
 
-        properties["코드"] = code
+        props["코드"] = code
 
-        properties["지도값"] = metric_map.get(
+        props["지도값"] = value_map.get(
             code,
             np.nan,
         )
@@ -619,32 +449,39 @@ def attach_metric(
 
 
 # =========================================================
-# 단계 구간 계산
+# 색상 구간
 # =========================================================
 
-def get_breaks(values, fixed_breaks=None):
-
-    values = pd.Series(values).dropna()
+def get_breaks(
+    values,
+    fixed_breaks=None,
+):
 
     if fixed_breaks is not None:
         return fixed_breaks
 
-    if values.empty:
-        return [0, 25, 50, 75]
+    values = pd.Series(values).dropna()
 
-    # 실제 전국 분포의 20/40/60/80 분위값
-    quantiles = np.nanpercentile(
+    if values.empty:
+        return [
+            20,
+            40,
+            60,
+            80,
+        ]
+
+    result = np.nanpercentile(
         values,
         [20, 40, 60, 80],
     )
 
     return [
-        float(x)
-        for x in quantiles
+        float(value)
+        for value in result
     ]
 
 
-def classify_value(
+def classify(
     value,
     breaks,
 ):
@@ -667,23 +504,16 @@ def classify_value(
     return 4
 
 
-# =========================================================
-# 범례 문자열
-# =========================================================
-
-def make_legend(
-    breaks,
-    unit="%",
-):
+def legend_labels(breaks):
 
     b1, b2, b3, b4 = breaks
 
     return [
-        f"{b1:.1f}{unit} 미만",
-        f"{b1:.1f}~{b2:.1f}{unit}",
-        f"{b2:.1f}~{b3:.1f}{unit}",
-        f"{b3:.1f}~{b4:.1f}{unit}",
-        f"{b4:.1f}{unit} 이상",
+        f"{b1:.1f}% 미만",
+        f"{b1:.1f}~{b2:.1f}%",
+        f"{b2:.1f}~{b3:.1f}%",
+        f"{b3:.1f}~{b4:.1f}%",
+        f"{b4:.1f}% 이상",
     ]
 
 
@@ -707,100 +537,61 @@ def create_map(
 
         feature[
             "properties"
-        ]["단계"] = classify_value(
+        ]["단계"] = classify(
             value,
             breaks,
         )
 
-
-    # -----------------------------------------------------
-    # 계단식 색상
-    # -----------------------------------------------------
-
     colorscale = [
-        [0.00, PALETTE[0]],
-        [0.20, PALETTE[0]],
-
-        [0.20, PALETTE[1]],
-        [0.40, PALETTE[1]],
-
-        [0.40, PALETTE[2]],
-        [0.60, PALETTE[2]],
-
-        [0.60, PALETTE[3]],
-        [0.80, PALETTE[3]],
-
-        [0.80, PALETTE[4]],
-        [1.00, PALETTE[4]],
+        [0.00, COLORS[0]],
+        [0.20, COLORS[0]],
+        [0.20, COLORS[1]],
+        [0.40, COLORS[1]],
+        [0.40, COLORS[2]],
+        [0.60, COLORS[2]],
+        [0.60, COLORS[3]],
+        [0.80, COLORS[3]],
+        [0.80, COLORS[4]],
+        [1.00, COLORS[4]],
     ]
-
 
     locations = [
         feature[
             "properties"
         ]["코드"]
-
-        for feature
-        in geojson["features"]
+        for feature in geojson["features"]
     ]
 
     stages = [
         feature[
             "properties"
         ]["단계"]
-
-        for feature
-        in geojson["features"]
+        for feature in geojson["features"]
     ]
-
 
     customdata = [
         [
             feature[
                 "properties"
-            ].get(
-                "시군구",
-                "",
-            ),
-
+            ].get("시군구", ""),
             feature[
                 "properties"
-            ].get(
-                "시도",
-                "",
-            ),
-
+            ].get("시도", ""),
             feature[
                 "properties"
-            ].get(
-                "지도값",
-                np.nan,
-            ),
+            ].get("지도값", np.nan),
         ]
-
-        for feature
-        in geojson["features"]
+        for feature in geojson["features"]
     ]
-
-
-    # -----------------------------------------------------
-    # 지도
-    # -----------------------------------------------------
 
     fig = go.Figure(
         go.Choroplethmap(
-
             geojson=geojson,
-
             locations=locations,
-
             z=stages,
-
             featureidkey="properties.코드",
-
             zmin=0,
             zmax=4,
-
             colorscale=colorscale,
 
             marker_line_color="white",
@@ -808,10 +599,11 @@ def create_map(
 
             customdata=customdata,
 
+            # hover는 단순 텍스트만 사용합니다.
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
                 "시도: %{customdata[1]}<br>"
-                "비율: %{customdata[2]:.1f}%"
+                "수치: %{customdata[2]:.1f}%"
                 "<extra></extra>"
             ),
 
@@ -825,51 +617,31 @@ def create_map(
             ),
 
             colorbar=dict(
-
                 title="비율",
-
                 tickmode="array",
-
-                tickvals=[
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                ],
-
-                ticktext=make_legend(
-                    breaks
-                ),
-
+                tickvals=[0, 1, 2, 3, 4],
+                ticktext=legend_labels(breaks),
                 len=0.65,
             ),
         )
     )
 
-
     fig.update_layout(
-
         map=dict(
             style="white-bg",
-
             center=dict(
                 lat=36.2,
                 lon=127.8,
             ),
-
             zoom=6.2,
         ),
-
         height=680,
-
         margin=dict(
             l=0,
             r=0,
             t=0,
             b=0,
         ),
-
         paper_bgcolor="white",
         plot_bgcolor="white",
     )
@@ -903,7 +675,6 @@ def make_rank_tables(
         subset=[metric_column]
     )
 
-
     high = (
         table
         .sort_values(
@@ -926,7 +697,6 @@ def make_rank_tables(
         .reset_index(drop=True)
     )
 
-
     high[metric_column] = high[
         metric_column
     ].map(
@@ -939,7 +709,6 @@ def make_rank_tables(
         lambda x: f"{x:.1f}%"
     )
 
-
     high.index += 1
     low.index += 1
 
@@ -950,120 +719,44 @@ def make_rank_tables(
 
 
 # =========================================================
-# 지표 화면
+# 지표별 화면
 # =========================================================
 
-def render_metric_tab(
+def render_metric(
     geojson,
     statistics,
     names,
     title,
     description,
     metric_column,
-    latest_year,
     fixed_breaks=None,
 ):
 
     st.markdown(
-        f"""
-        <div class="section-title">
-            {title}
-        </div>
-
-        <div class="section-description">
-            {description}
-        </div>
-
-        <div class="hover-guide">
-            지도에 마우스를 올리면 시군구별 수치를 확인할 수 있어요.
-        </div>
-        """,
-        unsafe_allow_html=True,
+        f"### {title}"
     )
 
+    st.write(description)
 
-    # -----------------------------------------------------
-    # 지도용 경계값
-    # -----------------------------------------------------
+    st.info(
+        "지도에 마우스를 올리면 시군구별 수치를 확인할 수 있어요."
+    )
 
+    # 지도 구간
     breaks = get_breaks(
         statistics[metric_column],
-        fixed_breaks=fixed_breaks,
+        fixed_breaks,
     )
 
-
-    # -----------------------------------------------------
-    # 현재 전국 평균
-    # -----------------------------------------------------
-
-    weighted_value = None
-
-    if metric_column == "고령화율":
-
-        total = statistics["전체인구"].sum()
-        elderly = statistics["고령인구"].sum()
-
-        if total > 0:
-            weighted_value = (
-                elderly / total * 100
-            )
-
-    elif metric_column == "유소년비율":
-
-        total = statistics["전체인구"].sum()
-        children = statistics["유소년인구"].sum()
-
-        if total > 0:
-            weighted_value = (
-                children / total * 100
-            )
-
-    elif metric_column == "생산연령비율":
-
-        total = statistics["전체인구"].sum()
-        working = statistics["생산연령인구"].sum()
-
-        if total > 0:
-            weighted_value = (
-                working / total * 100
-            )
-
-    elif metric_column == "노년부양비":
-
-        working = statistics["생산연령인구"].sum()
-        elderly = statistics["고령인구"].sum()
-
-        if working > 0:
-            weighted_value = (
-                elderly / working * 100
-            )
-
-
-    if weighted_value is not None:
-
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-name">
-                    {latest_year}년 전국 기준
-                </div>
-
-                <div class="metric-value">
-                    {weighted_value:.1f}%
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-
-    # -----------------------------------------------------
-    # 지도
-    # -----------------------------------------------------
-
+    # 지도 데이터 복사
     map_geojson = {
         "type": "FeatureCollection",
-        "features": [
+        "features": [],
+    }
+
+    for feature in geojson["features"]:
+
+        map_geojson["features"].append(
             {
                 "type": feature["type"],
                 "geometry": feature["geometry"],
@@ -1071,9 +764,7 @@ def render_metric_tab(
                     feature["properties"]
                 ),
             }
-            for feature in geojson["features"]
-        ],
-    }
+        )
 
     map_geojson = attach_metric(
         map_geojson,
@@ -1081,6 +772,7 @@ def render_metric_tab(
         metric_column,
     )
 
+    # 지도
     fig = create_map(
         map_geojson,
         breaks,
@@ -1091,31 +783,19 @@ def render_metric_tab(
         use_container_width=True,
     )
 
-
-    # -----------------------------------------------------
-    # 순위표
-    # -----------------------------------------------------
-
+    # 순위
     high, low = make_rank_tables(
         statistics,
         names,
         metric_column,
     )
 
-    left, right = st.columns(
-        2,
-        gap="large",
-    )
-
+    left, right = st.columns(2)
 
     with left:
 
         st.markdown(
-            """
-            <div class="rank rank-high">
-                높은 곳 TOP 10
-            </div>
-            """,
+            '<div class="rank-high">높은 곳 TOP 10</div>',
             unsafe_allow_html=True,
         )
 
@@ -1125,15 +805,10 @@ def render_metric_tab(
             height=400,
         )
 
-
     with right:
 
         st.markdown(
-            """
-            <div class="rank rank-low">
-                낮은 곳 TOP 10
-            </div>
-            """,
+            '<div class="rank-low">낮은 곳 TOP 10</div>',
             unsafe_allow_html=True,
         )
 
@@ -1143,40 +818,39 @@ def render_metric_tab(
             height=400,
         )
 
-
     st.caption(
-        "지도 색상 구간: "
+        "지도 구간: "
         + " / ".join(
-            make_legend(breaks)
+            legend_labels(breaks)
         )
     )
 
 
 # =========================================================
-# 앱 제목
+# 제목
 # =========================================================
 
 st.markdown(
-    """
-    <div class="badge">
-        전국 인구통계 DATA PLAYGROUND
-    </div>
+    '<div class="badge">전국 인구통계 DATA PLAYGROUND</div>',
+    unsafe_allow_html=True,
+)
 
-    <div class="title">
+st.markdown(
+    """
+    <div class="cute-title">
         우리나라 인구,
         <span class="pink">팝팝</span>
         뜯어보기
-        <span class="bounce">✦</span>
-        <span class="bounce">●</span>
-        <span class="bounce">✧</span>
-    </div>
-
-    <div class="subtitle">
-        시군구별 인구구조를 지도와 숫자로 한눈에 살펴보세요.
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+st.markdown(
+    "시군구별 인구구조를 지도와 숫자로 한눈에 살펴보세요."
+)
+
+st.markdown("---")
 
 
 # =========================================================
@@ -1205,30 +879,30 @@ try:
 
         geojson = load_geojson()
 
-except Exception as e:
+except Exception as error:
 
     st.error(
         "데이터를 불러오지 못했습니다."
     )
 
-    st.exception(e)
+    st.exception(error)
 
     st.stop()
 
 
 # =========================================================
-# 지도 지역명 데이터
+# 지역명
 # =========================================================
 
 names = pd.DataFrame(
     [
         {
-            "시군구코드": feature[
-                "properties"
-            ].get(
-                "코드",
-                "",
-            ),
+            "시군구코드": str(
+                feature["properties"].get(
+                    "코드",
+                    "",
+                )
+            ).zfill(5),
 
             "시군구": feature[
                 "properties"
@@ -1250,34 +924,20 @@ names = pd.DataFrame(
     ]
 )
 
-names["시군구코드"] = (
-    names["시군구코드"]
-    .astype("string")
-    .str.zfill(5)
-)
-
 
 # =========================================================
-# 최신 연도 카드
+# 중요: 기준 연도는 HTML을 사용하지 않음
 # =========================================================
 
-st.markdown(
-    f"""
-    <div class="year-card">
-        <div class="year-label">
-            기준 연도
-        </div>
+st.subheader("기준 연도")
 
-        <div class="year-value">
-            {latest_year}년 전국 시군구
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.metric(
+    label="가장 최신 연도",
+    value=f"{latest_year}년",
 )
 
 st.caption(
-    "가장 최신 연도의 읍·면·동 인구를 시군구 단위로 합산했습니다."
+    "가장 최신 연도의 읍·면·동 인구를 사용합니다."
 )
 
 
@@ -1302,7 +962,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 
 with tab1:
 
-    render_metric_tab(
+    render_metric(
         geojson=geojson,
         statistics=statistics,
         names=names,
@@ -1311,9 +971,6 @@ with tab1:
             "65세 이상 인구가 전체 인구에서 차지하는 비율입니다."
         ),
         metric_column="고령화율",
-        latest_year=latest_year,
-
-        # 사용자가 지정한 고정 구간
         fixed_breaks=[
             19,
             23,
@@ -1329,7 +986,7 @@ with tab1:
 
 with tab2:
 
-    render_metric_tab(
+    render_metric(
         geojson=geojson,
         statistics=statistics,
         names=names,
@@ -1338,7 +995,6 @@ with tab2:
             "0~14세 인구가 전체 인구에서 차지하는 비율입니다."
         ),
         metric_column="유소년비율",
-        latest_year=latest_year,
     )
 
 
@@ -1348,7 +1004,7 @@ with tab2:
 
 with tab3:
 
-    render_metric_tab(
+    render_metric(
         geojson=geojson,
         statistics=statistics,
         names=names,
@@ -1357,7 +1013,6 @@ with tab3:
             "15~64세 인구가 전체 인구에서 차지하는 비율입니다."
         ),
         metric_column="생산연령비율",
-        latest_year=latest_year,
     )
 
 
@@ -1367,16 +1022,15 @@ with tab3:
 
 with tab4:
 
-    render_metric_tab(
+    render_metric(
         geojson=geojson,
         statistics=statistics,
         names=names,
         title="노년부양비",
         description=(
-            "생산연령인구 100명이 부양해야 하는 65세 이상 인구의 수입니다."
+            "생산연령인구 100명에 해당하는 65세 이상 인구의 수입니다."
         ),
         metric_column="노년부양비",
-        latest_year=latest_year,
     )
 
 
@@ -1386,106 +1040,75 @@ with tab4:
 
 with tab5:
 
-    st.markdown(
-        """
-        <div class="section-title">
-            전국 인구 추이
-        </div>
+    st.subheader("전국 인구 추이")
 
-        <div class="section-description">
-            2015년부터 가장 최신 연도까지 전국 인구가 어떻게 변했는지 살펴봅니다.
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.write(
+        "2015년부터 가장 최신 연도까지 전국 인구 변화를 보여줍니다."
     )
 
+    # ---------------------------------------------
+    # 전국 기준값
+    # ---------------------------------------------
 
-    # -----------------------------------------------------
-    # 최신 인구
-    # -----------------------------------------------------
+    first_row = national_trend.iloc[0]
+    latest_row = national_trend.iloc[-1]
 
-    latest_population = national_trend.iloc[-1][
-        "전체인구"
-    ]
+    first_population = float(
+        first_row["전체인구"]
+    )
 
-    first_population = national_trend.iloc[0][
-        "전체인구"
-    ]
+    latest_population = float(
+        latest_row["전체인구"]
+    )
 
-    change = (
+    difference = (
         latest_population
         - first_population
     )
 
-    change_percent = (
-        change
-        / first_population
-        * 100
-        if first_population > 0
-        else np.nan
-    )
+    if first_population != 0:
+        difference_rate = (
+            difference
+            / first_population
+            * 100
+        )
+    else:
+        difference_rate = np.nan
 
+
+    # ---------------------------------------------
+    # 중요:
+    # '전국 기준'을 HTML로 만들지 않습니다.
+    # Streamlit 기본 metric을 사용합니다.
+    # ---------------------------------------------
 
     col1, col2, col3 = st.columns(3)
 
-
     with col1:
 
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-name">
-                    최신 연도 전국 인구
-                </div>
-
-                <div class="metric-value">
-                    {latest_population:,.0f}명
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            label="최신 연도 전국 인구",
+            value=f"{latest_population:,.0f}명",
         )
-
 
     with col2:
 
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-name">
-                    {int(national_trend.iloc[0]["연도"])}년 대비 변화
-                </div>
-
-                <div class="metric-value">
-                    {change:+,.0f}명
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            label=f"{int(first_row['연도'])}년 대비",
+            value=f"{difference:+,.0f}명",
         )
-
 
     with col3:
 
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-name">
-                    전체 변화율
-                </div>
-
-                <div class="metric-value">
-                    {change_percent:+.1f}%
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            label="전체 변화율",
+            value=f"{difference_rate:+.1f}%",
         )
 
 
-    # -----------------------------------------------------
+    # ---------------------------------------------
     # 그래프
-    # -----------------------------------------------------
+    # ---------------------------------------------
 
     fig = go.Figure()
 
@@ -1499,7 +1122,7 @@ with tab5:
                 width=4,
             ),
             marker=dict(
-                color="#FFFFFF",
+                color="white",
                 size=9,
                 line=dict(
                     color="#E76582",
@@ -1514,32 +1137,26 @@ with tab5:
         )
     )
 
-
     fig.update_layout(
         height=520,
-
         margin=dict(
             l=20,
             r=20,
             t=20,
             b=20,
         ),
-
         paper_bgcolor="white",
         plot_bgcolor="white",
-
         xaxis=dict(
             title="연도",
             dtick=1,
             showgrid=False,
         ),
-
         yaxis=dict(
             title="인구",
             tickformat=",",
             gridcolor="#F0E5E8",
         ),
-
         hoverlabel=dict(
             bgcolor="#FFF9FB",
             bordercolor="#E76582",
@@ -1550,16 +1167,15 @@ with tab5:
         ),
     )
 
-
     st.plotly_chart(
         fig,
         use_container_width=True,
     )
 
 
-    # -----------------------------------------------------
+    # ---------------------------------------------
     # 연도별 표
-    # -----------------------------------------------------
+    # ---------------------------------------------
 
     trend_table = national_trend.copy()
 
@@ -1592,20 +1208,23 @@ with tab5:
 
 
 # =========================================================
-# 하단 설명
+# 하단
 # =========================================================
 
-st.markdown(
-    f"""
-    <div class="footer">
-        {latest_year}년 최신 읍·면·동 인구 데이터를 기준으로 계산했습니다.
-        <br>
-        시군구는 읍·면·동 행정코드 앞 5자리를 이용해 연결했습니다.
-        <br>
-        고령화율 = 65세 이상 인구 ÷ 전체 인구 × 100
-        &nbsp; · &nbsp;
-        노년부양비 = 65세 이상 인구 ÷ 15~64세 인구 × 100
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.markdown("---")
+
+st.caption(
+    f"{latest_year}년 최신 읍·면·동 인구 데이터를 기준으로 계산했습니다."
+)
+
+st.caption(
+    "시군구는 행정동 코드 앞 5자리를 이용해 지도와 연결했습니다."
+)
+
+st.caption(
+    "고령화율 = 65세 이상 인구 ÷ 전체 인구 × 100"
+)
+
+st.caption(
+    "노년부양비 = 65세 이상 인구 ÷ 15~64세 인구 × 100"
 )
