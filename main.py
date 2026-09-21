@@ -1,5 +1,15 @@
 # main.py
-# 🧓🏻 전국 시군구별 고령화율을 귀엽고 통통 튀게 보여주는 Streamlit 앱
+# 🗺️ 전국 시군구별 고령화율 팝팝 지도
+#
+# 주요 기능
+# - 최신 연도의 시군구별 65세 이상 인구 비율
+# - 코드 앞 5자리 기준 시군구 매칭
+# - 5단계 단계구분도
+# - 귀여운 hover 정보
+# - TOP 10 / BOTTOM 10
+# - 깜찍한 UI / 카드 / 배지 / 장식
+# - 배경 지도 타일 없음
+
 
 import gzip
 import io
@@ -16,7 +26,7 @@ import streamlit as st
 # =========================================================
 
 st.set_page_config(
-    page_title="전국 고령화 톡톡 지도",
+    page_title="고령화 팝팝 지도",
     page_icon="🧓🏻",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -34,181 +44,364 @@ GEOJSON_URL = (
 )
 
 
-# ---------------------------------------------------------
-# 지도 색상
-# ---------------------------------------------------------
+# =========================================================
+# 색상
+# =========================================================
 
 COLORS = [
-    "#FFF1B8",  # 아주 옅은 노랑
-    "#FFD6A5",  # 복숭아
-    "#FFB4A2",  # 살구
-    "#F28482",  # 코랄
-    "#C85C7A",  # 진한 핑크
+    "#FFF4C2",  # 1단계 - 크림
+    "#FFD9A8",  # 2단계 - 복숭아
+    "#FFB6A3",  # 3단계 - 살구
+    "#F48686",  # 4단계 - 코랄
+    "#C85A78",  # 5단계 - 딸기
 ]
-
-BREAKS = [19, 23, 28, 38]
 
 
 # =========================================================
-# 귀여운 CSS
+# CSS
 # =========================================================
 
 st.markdown(
     """
     <style>
 
-    /* 전체 배경 */
+    /* -----------------------------------------------------
+       전체 배경
+    ----------------------------------------------------- */
+
     .stApp {
         background:
-            radial-gradient(circle at 5% 5%, #FFF4C7 0, transparent 22%),
-            radial-gradient(circle at 95% 10%, #FFDCE8 0, transparent 22%),
-            radial-gradient(circle at 90% 90%, #DDF7F0 0, transparent 22%),
+            radial-gradient(
+                circle at 4% 4%,
+                rgba(255, 229, 145, 0.45) 0,
+                transparent 19%
+            ),
+            radial-gradient(
+                circle at 96% 5%,
+                rgba(255, 190, 211, 0.40) 0,
+                transparent 20%
+            ),
+            radial-gradient(
+                circle at 92% 90%,
+                rgba(178, 235, 220, 0.35) 0,
+                transparent 22%
+            ),
             #FFFDF9;
     }
 
-    /* 기본 폰트 */
-    html, body, [class*="css"] {
-        font-family:
-            "Pretendard",
-            "Apple SD Gothic Neo",
-            "Noto Sans KR",
-            sans-serif;
-    }
 
-    /* 상단 여백 */
+    /* -----------------------------------------------------
+       기본 여백
+    ----------------------------------------------------- */
+
     .block-container {
-        padding-top: 2.2rem;
-        padding-bottom: 3rem;
         max-width: 1400px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
     }
 
-    /* 메인 타이틀 */
-    .main-title {
-        font-size: 3rem;
-        font-weight: 900;
-        letter-spacing: -2px;
-        color: #47313B;
-        line-height: 1.15;
-        margin-bottom: 0.35rem;
-    }
 
-    .main-title .point {
-        color: #E86A83;
-    }
+    /* -----------------------------------------------------
+       메인 제목
+    ----------------------------------------------------- */
 
-    .subtitle {
-        color: #8D747D;
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
-
-    /* 귀여운 배지 */
-    .cute-badge {
-        display: inline-block;
-        background: #FFE2EA;
-        color: #C94F70;
-        border-radius: 999px;
-        padding: 7px 15px;
-        font-size: 0.82rem;
-        font-weight: 800;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 12px rgba(201, 79, 112, 0.12);
-    }
-
-    /* 기준연도 카드 */
-    .year-card {
-        background: rgba(255,255,255,0.88);
-        border: 2px solid #F7D8DF;
-        border-radius: 22px;
-        padding: 18px 22px;
-        box-shadow: 0 8px 25px rgba(122, 77, 91, 0.08);
-        margin-bottom: 18px;
-    }
-
-    .year-label {
-        color: #9B7C85;
-        font-size: 0.82rem;
-        font-weight: 700;
-        margin-bottom: 2px;
-    }
-
-    .year-value {
-        color: #D85E79;
-        font-size: 1.55rem;
-        font-weight: 900;
-    }
-
-    /* 섹션 제목 */
-    .section-title {
-        color: #47313B;
-        font-size: 1.45rem;
-        font-weight: 900;
-        letter-spacing: -0.7px;
-        margin-top: 25px;
+    .title-wrap {
+        position: relative;
         margin-bottom: 8px;
     }
 
-    .section-description {
-        color: #927A82;
-        font-size: 0.92rem;
-        margin-bottom: 15px;
+    .main-title {
+        color: #47323B;
+        font-size: 3.15rem;
+        font-weight: 950;
+        letter-spacing: -3px;
+        line-height: 1.1;
     }
 
-    /* 순위 카드 */
+    .main-title .pink {
+        color: #E76582;
+    }
+
+    .main-title .yellow {
+        color: #F2A93B;
+    }
+
+    .subtitle {
+        color: #957B84;
+        font-size: 1.02rem;
+        font-weight: 650;
+        margin-bottom: 20px;
+    }
+
+
+    /* -----------------------------------------------------
+       제목 주변의 통통 튀는 장식
+    ----------------------------------------------------- */
+
+    .sparkle {
+        display: inline-block;
+        animation: bounce 1.6s infinite ease-in-out;
+    }
+
+    .sparkle:nth-child(2) {
+        animation-delay: 0.25s;
+    }
+
+    .sparkle:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-7px) rotate(8deg);
+        }
+    }
+
+
+    /* -----------------------------------------------------
+       배지
+    ----------------------------------------------------- */
+
+    .cute-badge {
+        display: inline-block;
+        background: #FFE2EA;
+        color: #C94E70;
+        border: 1px solid #F5C7D4;
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 850;
+        box-shadow:
+            0 5px 15px rgba(201, 78, 112, 0.12);
+        margin-bottom: 10px;
+    }
+
+
+    /* -----------------------------------------------------
+       기준연도 카드
+    ----------------------------------------------------- */
+
+    .year-card {
+        position: relative;
+        overflow: hidden;
+
+        background: rgba(255,255,255,0.90);
+        border: 2px solid #F5DCE2;
+        border-radius: 25px;
+
+        padding: 17px 22px;
+
+        box-shadow:
+            0 9px 28px rgba(95, 58, 71, 0.08);
+
+        margin-bottom: 20px;
+    }
+
+    .year-card::after {
+        content: "POP!";
+        position: absolute;
+        right: 22px;
+        top: 13px;
+
+        background: #FFF0A9;
+        color: #9B6A20;
+
+        font-size: 0.72rem;
+        font-weight: 950;
+
+        padding: 6px 9px;
+
+        border-radius: 10px;
+
+        transform: rotate(7deg);
+
+        animation: tinyPop 1.8s infinite ease-in-out;
+    }
+
+    @keyframes tinyPop {
+        0%, 100% {
+            transform: rotate(7deg) scale(1);
+        }
+
+        50% {
+            transform: rotate(-4deg) scale(1.08);
+        }
+    }
+
+    .year-label {
+        color: #9D828B;
+        font-size: 0.78rem;
+        font-weight: 750;
+    }
+
+    .year-value {
+        color: #D95D78;
+        font-size: 1.45rem;
+        font-weight: 950;
+    }
+
+
+    /* -----------------------------------------------------
+       섹션 제목
+    ----------------------------------------------------- */
+
+    .section-title {
+        color: #47323B;
+        font-size: 1.48rem;
+        font-weight: 950;
+        letter-spacing: -1px;
+        margin-top: 25px;
+        margin-bottom: 5px;
+    }
+
+    .section-description {
+        color: #927B83;
+        font-size: 0.91rem;
+        font-weight: 600;
+        margin-bottom: 13px;
+    }
+
+
+    /* -----------------------------------------------------
+       지도 안내 카드
+    ----------------------------------------------------- */
+
+    .hover-guide {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        background: linear-gradient(
+            100deg,
+            #FFF2C9,
+            #FFE7EF
+        );
+
+        border: 1px solid #F3D7DE;
+        border-radius: 18px;
+
+        padding: 12px 17px;
+        margin-bottom: 10px;
+
+        color: #715761;
+        font-size: 0.9rem;
+        font-weight: 750;
+
+        box-shadow:
+            0 5px 16px rgba(100, 62, 74, 0.06);
+    }
+
+    .hover-icon {
+        font-size: 1.35rem;
+        animation: hoverBounce 1.2s infinite;
+    }
+
+    @keyframes hoverBounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+
+    /* -----------------------------------------------------
+       지도
+    ----------------------------------------------------- */
+
+    [data-testid="stPlotlyChart"] {
+        background: rgba(255,255,255,0.96);
+        border: 1px solid #F1E0E4;
+        border-radius: 28px;
+
+        padding: 8px;
+
+        box-shadow:
+            0 13px 35px rgba(82, 51, 61, 0.10);
+    }
+
+
+    /* -----------------------------------------------------
+       TOP / BOTTOM 헤더
+    ----------------------------------------------------- */
+
     .rank-header {
         border-radius: 20px;
-        padding: 15px 19px;
+        padding: 15px 18px;
         margin-bottom: 10px;
-        font-weight: 900;
-        font-size: 1.05rem;
+
+        font-weight: 950;
+        font-size: 1.02rem;
+
+        box-shadow:
+            0 6px 18px rgba(85, 54, 64, 0.06);
     }
 
     .rank-high {
-        background: #FFE5EA;
-        color: #B94D68;
-        border: 1px solid #F6CBD5;
+        background: linear-gradient(
+            100deg,
+            #FFE0E8,
+            #FFF0D0
+        );
+
+        color: #B84E68;
+        border: 1px solid #F4CDD6;
     }
 
     .rank-low {
-        background: #DFF6EF;
-        color: #368875;
-        border: 1px solid #C5E9DE;
+        background: linear-gradient(
+            100deg,
+            #DDF7EF,
+            #E9F5FF
+        );
+
+        color: #378875;
+        border: 1px solid #C7E9DF;
     }
 
-    /* Streamlit dataframe */
+
+    /* -----------------------------------------------------
+       표
+    ----------------------------------------------------- */
+
     [data-testid="stDataFrame"] {
         border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 6px 22px rgba(80, 52, 61, 0.07);
-        border: 1px solid #F0E3E6;
+
+        border: 1px solid #F0E2E5;
+
+        box-shadow:
+            0 7px 22px rgba(80, 50, 60, 0.07);
     }
 
-    /* 정보 박스 */
-    [data-testid="stAlert"] {
-        border-radius: 18px;
-        border: 1px solid #F3D6DD;
-    }
 
-    /* Plotly 지도 카드처럼 보이게 */
-    [data-testid="stPlotlyChart"] {
-        background: white;
-        border-radius: 25px;
-        padding: 8px;
-        box-shadow: 0 10px 30px rgba(80, 52, 61, 0.09);
-        border: 1px solid #F2E6E8;
-    }
+    /* -----------------------------------------------------
+       하단 설명
+    ----------------------------------------------------- */
 
-    /* 하단 설명 */
     .footer-note {
         text-align: center;
-        color: #AA9299;
-        font-size: 0.82rem;
-        margin-top: 28px;
-        padding: 15px;
+
+        color: #AA929A;
+
+        font-size: 0.81rem;
+        font-weight: 600;
+
+        margin-top: 30px;
+        padding: 20px;
     }
 
-    /* Streamlit 기본 메뉴 */
+
+    /* -----------------------------------------------------
+       Streamlit 기본 UI 숨기기
+    ----------------------------------------------------- */
+
     #MainMenu {
         visibility: hidden;
     }
@@ -228,23 +421,29 @@ st.markdown(
 
 
 # =========================================================
-# 데이터 가져오기
+# 데이터 불러오기
 # =========================================================
 
 @st.cache_data
 def load_population():
-    """인구 CSV를 내려받아 읽습니다."""
 
-    response = requests.get(POPULATION_URL, timeout=60)
+    response = requests.get(
+        POPULATION_URL,
+        timeout=60,
+    )
+
     response.raise_for_status()
 
-    with gzip.GzipFile(fileobj=io.BytesIO(response.content)) as gz:
+    with gzip.GzipFile(
+        fileobj=io.BytesIO(response.content)
+    ) as gz:
+
         df = pd.read_csv(
             gz,
             dtype={"코드": "string"},
         )
 
-    # 코드는 숫자가 아니라 행정구역을 연결하기 위한 이름표입니다.
+    # 코드는 숫자가 아니라 이름표이므로 문자열로 유지합니다.
     df["코드"] = (
         df["코드"]
         .astype("string")
@@ -257,9 +456,12 @@ def load_population():
 
 @st.cache_data
 def load_geojson():
-    """시군구 경계 GeoJSON을 내려받습니다."""
 
-    response = requests.get(GEOJSON_URL, timeout=60)
+    response = requests.get(
+        GEOJSON_URL,
+        timeout=60,
+    )
+
     response.raise_for_status()
 
     return response.json()
@@ -271,16 +473,24 @@ def load_geojson():
 
 @st.cache_data
 def make_sigungu_data(df):
-    """최신 연도의 읍·면·동 데이터를 시군구별로 합칩니다."""
 
+    # 가장 최신 연도
     latest_year = int(df["연도"].max())
 
-    latest = df[df["연도"] == latest_year].copy()
+    latest = df[
+        df["연도"] == latest_year
+    ].copy()
 
-    # 읍·면·동 코드의 앞 5자리가 시군구 코드입니다.
-    latest["시군구코드"] = latest["코드"].str[:5]
+    # 읍·면·동 코드 앞 5자리 = 시군구 코드
+    latest["시군구코드"] = (
+        latest["코드"].str[:5]
+    )
 
-    # 65세 이상
+
+    # -----------------------------------------------------
+    # 65세 이상 인구
+    # -----------------------------------------------------
+
     elderly_columns = [
         f"계_{age}세"
         for age in range(65, 100)
@@ -288,9 +498,15 @@ def make_sigungu_data(df):
     ]
 
     if "계_100세 이상" in latest.columns:
-        elderly_columns.append("계_100세 이상")
+        elderly_columns.append(
+            "계_100세 이상"
+        )
 
-    # 전체 연령
+
+    # -----------------------------------------------------
+    # 전체 인구
+    # -----------------------------------------------------
+
     total_columns = [
         f"계_{age}세"
         for age in range(0, 100)
@@ -298,33 +514,60 @@ def make_sigungu_data(df):
     ]
 
     if "계_100세 이상" in latest.columns:
-        total_columns.append("계_100세 이상")
+        total_columns.append(
+            "계_100세 이상"
+        )
+
 
     # 숫자로 변환
-    for col in set(elderly_columns + total_columns):
+    for col in set(
+        elderly_columns + total_columns
+    ):
+
         latest[col] = pd.to_numeric(
             latest[col],
             errors="coerce",
         ).fillna(0)
 
-    latest["고령인구"] = latest[elderly_columns].sum(axis=1)
-    latest["전체인구"] = latest[total_columns].sum(axis=1)
 
+    # 읍·면·동별 계산
+    latest["고령인구"] = (
+        latest[elderly_columns].sum(axis=1)
+    )
+
+    latest["전체인구"] = (
+        latest[total_columns].sum(axis=1)
+    )
+
+
+    # -----------------------------------------------------
     # 시군구별 합계
+    # -----------------------------------------------------
+
     sigungu = (
         latest
-        .groupby("시군구코드", as_index=False)
+        .groupby(
+            "시군구코드",
+            as_index=False,
+        )
         .agg(
             고령인구=("고령인구", "sum"),
             전체인구=("전체인구", "sum"),
         )
     )
 
+
+    # 고령화율
     sigungu["고령화율"] = np.where(
         sigungu["전체인구"] > 0,
-        sigungu["고령인구"] / sigungu["전체인구"] * 100,
+
+        sigungu["고령인구"]
+        / sigungu["전체인구"]
+        * 100,
+
         np.nan,
     )
+
 
     return latest_year, sigungu
 
@@ -333,31 +576,49 @@ def make_sigungu_data(df):
 # GeoJSON에 고령화율 붙이기
 # =========================================================
 
-def add_geojson_properties(geojson, sigungu):
-    """시군구 코드 기준으로 고령화율을 지도에 연결합니다."""
+def add_geojson_properties(
+    geojson,
+    sigungu,
+):
 
     value_map = (
         sigungu
-        .set_index("시군구코드")["고령화율"]
+        .set_index("시군구코드")
+        ["고령화율"]
         .to_dict()
     )
 
+
     for feature in geojson["features"]:
 
-        properties = feature.get("properties", {})
+        properties = feature.get(
+            "properties",
+            {},
+        )
+
 
         code = (
-            str(properties.get("코드", ""))
+            str(
+                properties.get(
+                    "코드",
+                    "",
+                )
+            )
             .strip()
             .zfill(5)
         )
 
-        properties["고령화율"] = value_map.get(
-            code,
-            np.nan,
+
+        properties["고령화율"] = (
+            value_map.get(
+                code,
+                np.nan,
+            )
         )
 
+
         feature["properties"] = properties
+
 
     return geojson
 
@@ -367,7 +628,6 @@ def add_geojson_properties(geojson, sigungu):
 # =========================================================
 
 def classify_rate(rate):
-    """고령화율을 5개 구간으로 나눕니다."""
 
     if pd.isna(rate):
         return None
@@ -393,17 +653,27 @@ def classify_rate(rate):
 
 def make_map(geojson):
 
+    # 각 시군구를 0~4 단계로 분류
     for feature in geojson["features"]:
 
-        rate = feature["properties"].get(
+        rate = feature[
+            "properties"
+        ].get(
             "고령화율",
             np.nan,
         )
 
-        feature["properties"]["단계"] = classify_rate(rate)
+        feature[
+            "properties"
+        ]["단계"] = classify_rate(rate)
 
-    # 5단계가 확실하게 끊겨 보이도록 색상 구간을 지정합니다.
+
+    # -----------------------------------------------------
+    # 5단계 색상
+    # -----------------------------------------------------
+
     colorscale = [
+
         [0.00, COLORS[0]],
         [0.1999, COLORS[0]],
 
@@ -420,23 +690,40 @@ def make_map(geojson):
         [1.00, COLORS[4]],
     ]
 
+
+    # -----------------------------------------------------
+    # 지도
+    # -----------------------------------------------------
+
     fig = go.Figure(
         go.Choroplethmap(
+
             geojson=geojson,
 
             locations=[
                 str(
-                    feature["properties"].get("코드", "")
+                    feature[
+                        "properties"
+                    ].get(
+                        "코드",
+                        "",
+                    )
                 ).zfill(5)
-                for feature in geojson["features"]
+
+                for feature
+                in geojson["features"]
             ],
 
             z=[
-                feature["properties"].get(
+                feature[
+                    "properties"
+                ].get(
                     "단계",
                     np.nan,
                 )
-                for feature in geojson["features"]
+
+                for feature
+                in geojson["features"]
             ],
 
             featureidkey="properties.코드",
@@ -446,40 +733,116 @@ def make_map(geojson):
 
             colorscale=colorscale,
 
+
+            # -------------------------------------------------
+            # 경계선
+            # -------------------------------------------------
+
             marker_line_color="#FFFFFF",
-            marker_line_width=0.8,
+            marker_line_width=0.85,
+
+
+            # -------------------------------------------------
+            # hover에 전달할 정보
+            # -------------------------------------------------
 
             customdata=[
+
                 [
-                    feature["properties"].get(
+
+                    feature[
+                        "properties"
+                    ].get(
                         "시군구",
                         "",
                     ),
 
-                    feature["properties"].get(
+                    feature[
+                        "properties"
+                    ].get(
                         "시도",
                         "",
                     ),
 
-                    feature["properties"].get(
+                    feature[
+                        "properties"
+                    ].get(
                         "고령화율",
                         np.nan,
                     ),
+
                 ]
-                for feature in geojson["features"]
+
+                for feature
+                in geojson["features"]
             ],
 
+
+            # -------------------------------------------------
+            # ✨ 핵심: 귀여운 hover
+            # -------------------------------------------------
+
             hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "📍 %{customdata[1]}<br>"
-                "👵 65세 이상: "
+
+                "<span style='font-size:18px'>"
+                "✨ <b>%{customdata[0]}</b>"
+                "</span>"
+                "<br>"
+
+                "<span style='font-size:12px'>"
+                "📍 %{customdata[1]}"
+                "</span>"
+                "<br><br>"
+
+                "<span style='font-size:13px'>"
+                "👵🏻 65세 이상"
+                "</span>"
+                "<br>"
+
+                "<span style='font-size:24px; "
+                "color:#E76582'>"
                 "<b>%{customdata[2]:.1f}%</b>"
+                "</span>"
+
+                "<br>"
+
+                "<span style='font-size:11px; "
+                "color:#999'>"
+                "톡! 하고 확인했어요 💕"
+                "</span>"
+
                 "<extra></extra>"
             ),
 
+
+            # -------------------------------------------------
+            # hover 박스 스타일
+            # -------------------------------------------------
+
+            hoverlabel=dict(
+
+                bgcolor="#FFFDFB",
+
+                bordercolor="#E76582",
+
+                font=dict(
+                    family="Arial, sans-serif",
+                    size=13,
+                    color="#503A42",
+                ),
+
+                align="left",
+            ),
+
+
+            # -------------------------------------------------
+            # 범례
+            # -------------------------------------------------
+
             colorbar=dict(
+
                 title=dict(
-                    text="고령화율",
+                    text="💗 고령화율",
                     font=dict(
                         size=13,
                         color="#59434B",
@@ -511,23 +874,32 @@ def make_map(geojson):
 
                 len=0.62,
 
-                bgcolor="rgba(255,255,255,0.92)",
+                bgcolor=(
+                    "rgba(255,255,255,0.94)"
+                ),
 
-                bordercolor="#F0E1E5",
+                bordercolor="#F0DDE2",
                 borderwidth=1,
             ),
         )
     )
 
+
+    # -----------------------------------------------------
+    # 지도 설정
+    # -----------------------------------------------------
+
     fig.update_layout(
 
-        # 배경 타일 없이 흰색 배경만 사용
         map=dict(
+
             style="white-bg",
+
             center=dict(
                 lat=36.2,
                 lon=127.8,
             ),
+
             zoom=6.2,
         ),
 
@@ -540,37 +912,46 @@ def make_map(geojson):
 
         height=720,
 
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor=(
+            "rgba(0,0,0,0)"
+        ),
+
+        plot_bgcolor=(
+            "rgba(0,0,0,0)"
+        ),
     )
+
 
     return fig
 
 
 # =========================================================
-# 앱 화면
+# 화면 시작
 # =========================================================
 
-# 귀여운 상단 배지
-st.markdown(
-    '<div class="cute-badge">✨ DATA로 보는 우리 동네 이야기</div>',
-    unsafe_allow_html=True,
-)
-
-# 제목
 st.markdown(
     """
-    <div class="main-title">
-        전국 <span class="point">고령화 톡톡</span> 지도 🗺️
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+    <div class="title-wrap">
 
-st.markdown(
-    """
-    <div class="subtitle">
-        우리나라 시군구의 65세 이상 인구 비율을 한눈에 살펴봐요 👀
+        <div class="cute-badge">
+            ✨ DATA로 보는 우리 동네 이야기
+        </div>
+
+        <div class="main-title">
+            전국
+            <span class="pink"> 고령화</span>
+            <span class="yellow"> 팝팝</span>
+            지도
+            <span class="sparkle">✨</span>
+            <span class="sparkle">🧓🏻</span>
+            <span class="sparkle">💗</span>
+        </div>
+
+        <div class="subtitle">
+            마우스를 살짝 올려보세요.
+            지역이 톡! 하고 말을 걸어요 👀
+        </div>
+
     </div>
     """,
     unsafe_allow_html=True,
@@ -583,12 +964,16 @@ st.markdown(
 
 try:
 
-    with st.spinner("🧸 데이터를 꼼꼼하게 가져오는 중이에요..."):
+    with st.spinner(
+        "🧸 데이터를 데굴데굴 가져오는 중..."
+    ):
 
         population_df = load_population()
 
-        latest_year, sigungu_df = make_sigungu_data(
-            population_df
+        latest_year, sigungu_df = (
+            make_sigungu_data(
+                population_df
+            )
         )
 
         geojson = load_geojson()
@@ -601,7 +986,7 @@ try:
 except Exception as e:
 
     st.error(
-        "앗! 데이터를 불러오는 중 문제가 생겼어요 🥲"
+        "앗! 데이터를 가져오다가 살짝 넘어졌어요 🥲"
     )
 
     st.exception(e)
@@ -610,14 +995,49 @@ except Exception as e:
 
 
 # =========================================================
-# 기준 연도 카드
+# 기준 연도
 # =========================================================
 
 st.markdown(
     f"""
     <div class="year-card">
-        <div class="year-label">📅 현재 지도 기준</div>
-        <div class="year-value">{latest_year}년 전국 시군구</div>
+
+        <div class="year-label">
+            📅 지도 기준 연도
+        </div>
+
+        <div class="year-value">
+            {latest_year}년 전국 시군구
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# =========================================================
+# 지도 제목
+# =========================================================
+
+st.markdown(
+    """
+    <div class="section-title">
+        🗺️ 우리나라 고령화율을 한눈에!
+    </div>
+
+    <div class="section-description">
+        색이 진할수록 65세 이상 인구 비율이 높아요.
+    </div>
+
+    <div class="hover-guide">
+        <span class="hover-icon">👆🏻</span>
+
+        <span>
+            <b>마우스를 시군구 위에 살짝 올려보세요!</b>
+            &nbsp; → &nbsp;
+            지역 이름 + 시도 + 고령화율이 팝! 하고 나타나요 💥
+        </span>
     </div>
     """,
     unsafe_allow_html=True,
@@ -628,19 +1048,6 @@ st.markdown(
 # 지도
 # =========================================================
 
-st.markdown(
-    """
-    <div class="section-title">
-        🧓🏻 고령화율 지도
-    </div>
-    <div class="section-description">
-        색이 진할수록 65세 이상 인구의 비율이 높아요.
-        지도를 콕 눌러도 좋고, 마우스를 올려도 정보를 볼 수 있어요!
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
 fig = make_map(geojson)
 
 st.plotly_chart(
@@ -650,7 +1057,7 @@ st.plotly_chart(
 
 
 # =========================================================
-# 시군구 이름 붙이기
+# 지역 이름 연결
 # =========================================================
 
 geo_properties = []
@@ -665,7 +1072,10 @@ for feature in geojson["features"]:
     geo_properties.append(
         {
             "시군구코드": str(
-                properties.get("코드", "")
+                properties.get(
+                    "코드",
+                    "",
+                )
             ).zfill(5),
 
             "시군구": properties.get(
@@ -680,6 +1090,7 @@ for feature in geojson["features"]:
         }
     )
 
+
 geo_name_df = pd.DataFrame(
     geo_properties
 )
@@ -690,6 +1101,7 @@ table_df = sigungu_df.merge(
     on="시군구코드",
     how="left",
 )
+
 
 table_df = table_df.dropna(
     subset=["고령화율"]
@@ -704,7 +1116,7 @@ table_df["지역"] = (
 
 
 # =========================================================
-# TOP / BOTTOM 10
+# TOP 10 / BOTTOM 10
 # =========================================================
 
 high_10 = (
@@ -714,9 +1126,13 @@ high_10 = (
         ascending=False,
     )
     .head(10)
-    .loc[:, ["지역", "고령화율"]]
+    .loc[
+        :,
+        ["지역", "고령화율"],
+    ]
     .reset_index(drop=True)
 )
+
 
 low_10 = (
     table_df
@@ -725,42 +1141,54 @@ low_10 = (
         ascending=True,
     )
     .head(10)
-    .loc[:, ["지역", "고령화율"]]
+    .loc[
+        :,
+        ["지역", "고령화율"],
+    ]
     .reset_index(drop=True)
 )
 
 
-high_10["고령화율"] = high_10[
-    "고령화율"
-].map(
-    lambda x: f"{x:.1f}%"
-)
-
-low_10["고령화율"] = low_10[
-    "고령화율"
-].map(
-    lambda x: f"{x:.1f}%"
+high_10["고령화율"] = (
+    high_10["고령화율"]
+    .map(
+        lambda x: f"{x:.1f}%"
+    )
 )
 
 
-high_10.index = high_10.index + 1
-low_10.index = low_10.index + 1
+low_10["고령화율"] = (
+    low_10["고령화율"]
+    .map(
+        lambda x: f"{x:.1f}%"
+    )
+)
+
+
+high_10.index = (
+    high_10.index + 1
+)
+
+low_10.index = (
+    low_10.index + 1
+)
 
 high_10.index.name = "순위"
 low_10.index.name = "순위"
 
 
 # =========================================================
-# 두 표를 나란히 표시
+# 순위 영역
 # =========================================================
 
 st.markdown(
     """
     <div class="section-title">
-        🔎 고령화율 TOP & BOTTOM
+        🎀 고령화율 살펴보기
     </div>
+
     <div class="section-description">
-        최신 연도 기준으로 고령화율이 높은 지역과 낮은 지역을 살펴봐요.
+        지도에서 본 내용을 표에서도 콕콕 확인할 수 있어요.
     </div>
     """,
     unsafe_allow_html=True,
@@ -773,12 +1201,19 @@ col1, col2 = st.columns(
 )
 
 
+# ---------------------------------------------------------
+# 높은 곳
+# ---------------------------------------------------------
+
 with col1:
 
     st.markdown(
         """
         <div class="rank-header rank-high">
             🔥 고령화율 높은 곳 TOP 10
+            <span style="float:right">
+                👵🏻💗
+            </span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -791,12 +1226,19 @@ with col1:
     )
 
 
+# ---------------------------------------------------------
+# 낮은 곳
+# ---------------------------------------------------------
+
 with col2:
 
     st.markdown(
         """
         <div class="rank-header rank-low">
             🌱 고령화율 낮은 곳 TOP 10
+            <span style="float:right">
+                🌱✨
+            </span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -810,17 +1252,35 @@ with col2:
 
 
 # =========================================================
-# 하단 설명
+# 하단
 # =========================================================
 
 st.markdown(
     f"""
     <div class="footer-note">
-        💡 고령화율 = 65세 이상 인구 ÷ 전체 인구 × 100
-        &nbsp; · &nbsp;
-        {latest_year}년 읍·면·동 데이터를 시군구 코드 기준으로 합산했어요.
+
+        🧮
+        고령화율 =
+        <b>65세 이상 인구 ÷ 전체 인구 × 100</b>
+
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+
+        📊 {latest_year}년 읍·면·동 데이터를
+        시군구 코드 앞 5자리 기준으로 합산
+
+        <br><br>
+
+        🎨
+        지도는
+        <b>19% · 23% · 28% · 38%</b>
+        기준의 5단계 색상으로 표시했어요.
+
         <br>
-        🧡 지도 색상은 19% · 23% · 28% · 38%를 기준으로 5단계로 나눴어요.
+
+        <span style="color:#E76582">
+            ✨ 마우스를 올리면 톡! ✨
+        </span>
+
     </div>
     """,
     unsafe_allow_html=True,
